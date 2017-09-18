@@ -53,6 +53,18 @@ module.exports.close = function(sessionAttributes, fulfillmentState, message) {
   };
 };
 
+module.exports.closeResponseCard = function(sessionAttributes, fulfillmentState, message,title,imgurl,buttons) {
+  return {
+    sessionAttributes,
+    dialogAction: {
+      type: 'Close',
+      fulfillmentState,
+      message:{contentType: 'PlainText', content: message},
+      responseCard:getResponseCards(title,imgurl,buttons)
+    }
+  };
+};
+
 module.exports.confirmIntent = function(sessionAttributes, intentName, slots, message) {
    console.log('Inside LEX reponse confirmIntent ..... '+message );
   return {
