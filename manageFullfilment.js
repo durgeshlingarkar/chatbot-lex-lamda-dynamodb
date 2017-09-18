@@ -2,6 +2,8 @@
 
 const lexResponses = require('./lexResponses');
 const databaseManager = require('./databaseManager');
+const request = require('request');
+const promisify = require('es6-promisify');
 
 function buildFulfilmentResult(fullfilmentState, messageContent) {
   return {
@@ -42,6 +44,47 @@ function rateUser(userId,intentRequest)
     return buildFulfilmentResult('Fulfilled', 'Your rating is captured.');
   }); 
 }
+
+function getNewsHeadLines(intentRequest)
+{
+   var newsurl = process.env.newsapiurl+"?source="+process.env.newsapisource+"&apiKey="+process.env.newsapikey;
+     return Promise.resolve( request(newsurl, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    
+                     console.log("body ::: "+body); 
+                     console.log("response ::: "+JSON.stringify(response)) ;
+                     var newsbody = JSON.parse(body);
+                     var buttons = [];
+                     var titles = [];
+
+                    for(var key in newsbody)
+                    {
+                        if(key === "articles")
+                        {
+                          console.log("newsbody[key].length ::: "+newsbody[key].length);
+                          for(var idx=0 ; idx<newsbody[key].length ; idx++ )
+                          {
+                            console.log("#### title ::: "+newsbody[key][idx].title);
+                            titles[ titles.length ] = newsbody[key][idx].title;
+                             buttons[ idx ] = {"text":newsbody[key][idx].title , "value":newsbody[key][idx].title};
+                          }
+                        }
+                     }
+                     if( buttons.length > 0 )
+                     {
+                       //return  {"title":"News Updates","imageurl":process.env.respcardimg,"buttons":buttons};
+                       return lexResponses.close(intentRequest.sessionAttributes, 'Fulfilled', 'News Updated...');
+                       //lexResponses.close(intentRequest.sessionAttributes, 'Fulfilled', 'Thanks.. your user has been registered.');
+                       //console.log("I am here 2222222222222222222222222222 ::: ");
+                       //return Promise.resolve(lexResponses.close(intentRequest.sessionAttributes, 'Fulfilled', 'News updates generated'));
+                    }
+                     return lexResponses.close(intentRequest.sessionAttributes, 'Fulfilled', 'News Updated qqq...');
+                     //var vOptions = {"title":"Amount/Quantity Based ","imageurl":process.env.respcardimg,"buttons":[{"text":"AMOUNT BASED","value":"amount"},{"text":"QUANTITY BASED","value":"quantity"}]} ; 
+                    
+                 }
+            }));
+}
+
 
 module.exports = function(intentRequest) {
   console.log("Inside Manage Fullfiment @ @");
@@ -90,6 +133,14 @@ module.exports = function(intentRequest) {
       return lexResponses.close(intentRequest.sessionAttributes, fullfiledOrder.fullfilmentState, fullfiledOrder.message.content);
     });
 
+  }
+  else if(  intentname == "NewHeadLines" )   
+  {
+    //return Promise.resolve(lexResponses.close(intentRequest.sessionAttributes, 'Fulfilled', 'News updates generated'));
+    return Promise.resolve(getNewsHeadLines(intentRequest).then(response => {
+      console.log("Inside call back *&*&*&*&*&*&*& "+JSON.stringify(response));
+    
+    }));
   }
 
 };

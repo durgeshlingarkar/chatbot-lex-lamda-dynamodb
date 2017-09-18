@@ -335,6 +335,10 @@ module.exports = function(intentRequest) {
 			
 		});
 	}
+	else if( intentname == "NewHeadLines" )
+	{
+		return Promise.resolve(lexResponses.delegate(intentRequest.sessionAttributes, slots));
+	}
 		
 	
 
