@@ -3,6 +3,7 @@
 const DeRegisterUser = require('./DeRegisterUser');
 const RegisterUser = require('./RegisterUser');
 const AddOrder = require('./AddOrder');
+const newsUpdates = require('./newsUpdates');
 module.exports = function(intentRequest) {
 	
 	console.log('dispatch userId='+intentRequest.userId+', intentName='+intentRequest.currentIntent.name);
@@ -18,6 +19,10 @@ module.exports = function(intentRequest) {
 	else if (intentName === 'AddOrder'){
 		console.log(intentName + ' was called');
 		return AddOrder(intentRequest);	
+	}
+	else if (intentName === 'NewHeadLines'){
+		console.log(intentName + ' was called');
+		return newsUpdates(intentRequest);	
 	}
 	
 	throw new Error('Intent with name '+intentName+' not supported');
